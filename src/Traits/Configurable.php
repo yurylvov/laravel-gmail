@@ -3,6 +3,7 @@
 namespace Dacastro4\LaravelGmail\Traits;
 
 use Google_Service_Gmail;
+use Auth;
 
 /**
  * Trait Configurable
@@ -12,15 +13,17 @@ trait Configurable
 {
 
 	private $_config;
+	private $user;
 
 	public function __construct( $config )
 	{
 		$this->_config = $config;
+        $this->user = Auth::user();
 	}
 
 	public function config( $string = null )
 	{
-		$fileName = $this->getFileName();
+        $fileName = $this->getFileName();
 		$file = storage_path( "app/gmail/tokens/{$fileName}.json" );
 
 		if ( file_exists( $file ) ) {
@@ -76,7 +79,7 @@ trait Configurable
 
 	private function getFileName()
 	{
-		return $this->_config[ 'gmail.credentials_file_name' ];
+        return empty($this->user->email) ? $this->_config[ 'gmail.credentials_file_name' ] : $this->user->email;
 	}
 
 	private function mapScopes()
