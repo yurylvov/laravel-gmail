@@ -216,4 +216,26 @@ class Message
 
 		return $this;
 	}
+
+    /**
+     * Returns a collection of Mail instances belonging to same thread
+     *
+     * @param null|string $pageToken
+     *
+     * @return \Illuminate\Support\Collection
+     */
+    public function thread( $thread_id, $pageToken = null )
+    {
+        if ( ! is_null( $pageToken ) ) {
+            $this->add( $pageToken, 'pageToken' );
+        }
+        $messages = [];
+        $response = $this->service->users_threads->get( 'me', $thread_id );
+        $allThreadMessages = $response->getMessages();
+        $msgCount = count($allThreadMessages);
+        foreach ( $allThreadMessages as $message ) {
+            $messages[] = new Mail( $message, $this->preload );
+        }
+        return ['messages' => collect( $messages ), 'count' => $msgCount];
+    }
 }
